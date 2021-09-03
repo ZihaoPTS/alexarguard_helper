@@ -1,0 +1,17 @@
+#venv
+.venv/
+
+#folders
+ffmpeg-4.4-full_build/
+models/
+stanford-parser-4.2.0/
+stanford-parser-full-2018-02-27/
+
+#jar/zip
+stanford-corenlp-4.2.0-models-english.jar
+stanford-parser-4.2.0.zip
+stanford-parser-full-2018-02-27.zip
+
+#other cache file
+audio.mp3
+
