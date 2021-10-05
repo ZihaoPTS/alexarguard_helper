@@ -1,9 +1,8 @@
 #venv
 .venv/
+__pycache__/
 
 #folders
-ffmpeg-4.4-full_build/
-models/
 stanford-parser-4.2.0/
 stanford-parser-full-2018-02-27/
 
@@ -15,3 +14,6 @@ stanford-parser-full-2018-02-27.zip
 #other cache file
 audio.mp3
 
+#dependency
+models/
+ffmpeg-4.4-full_build/
