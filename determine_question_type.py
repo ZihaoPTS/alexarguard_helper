@@ -42,10 +42,11 @@ os.environ['JAVAHOME'] = java_path
 STANFORD = "models"
 
 # Create the server
-server = CoreNLPServer(
+
+'''server = CoreNLPServer(
    os.path.join(STANFORD, "stanford-corenlp-4.2.2.jar"),
    os.path.join(STANFORD, "stanford-corenlp-4.2.2-models.jar"),    
-)
+)'''
 
 #where to get -> https://search.maven.org/artifact/edu.stanford.nlp/stanford-corenlp/4.2.2/jar
 # p.s. mordel.jar and .jar
@@ -95,13 +96,13 @@ def determine_qeustion_type(question,parser):
         2. are they ask, say (or +ing) *
     Selection questions:
         1. contain CC tag(or) *
-        2. extract number/single character
-            2.1 check are these number continuous <- wait a bit
+        2. extract number/single character *
+            2.1 check are these number continuous 
     WH Question
         1. contiant 'WDT', 'WHADJP', 'WHADVP', *
             'WHNP', 'WHPP', 'WP', 'WP$', 'WP-S', 'WRB' *
     '''
-    print(question)
+    #print(question)
     leaf_queue = queue.Queue()
     question_parsed = next(parser.raw_parse(question))
     leaf_queue.put(question_parsed)
@@ -147,7 +148,9 @@ def determine_qeustion_type(question,parser):
             have_cont_num = True
 
     if have_CC or have_cont_num:
-        return 'selection'
+        return 'selection_CC'
+    if have_cont_num:
+        return 'selection_SC'
     if have_SQ and not have_SBARQ:
         return 'Y/N'
     if have_ask_say:
@@ -155,77 +158,76 @@ def determine_qeustion_type(question,parser):
     if have_WH:
         return 'WH'
 
+if __name__ == "__main__":
+    with CoreNLPServer(*jars):
+        parser = CoreNLPParser()
+        #parse = next(parser.raw_parse("I put the book in the box on the table."))
+        st1 = 'How can I help you?'
+        st2 = 'Are you staying or going?'
+        st3 = '...Just ask me for news, politics, or a story from history. What would you like to do?'
+        st4 = 'A: high, B: medium, C: low. Choose one.'
+        st5 = 'What’s your zip code?'
+        st6 = 'Are you ready?'
+        st7 = 'You’re going, aren’t you?'
+        st8 = 'Welcome to the Reddit Notifier skill... just Say: Help me'
+        st9 = 'To get started, you can get a quote, listen to the daily briefing, or get an account summary'
 
-with CoreNLPServer(*jars):
-    parser = CoreNLPParser()
-    #parse = next(parser.raw_parse("I put the book in the box on the table."))
+        print(determine_qeustion_type(st1,parser))
+        print(determine_qeustion_type(st2,parser))
+        print(determine_qeustion_type(st3,parser))
+        print(determine_qeustion_type(st4,parser))
+        print(determine_qeustion_type(st5,parser))
+        print(determine_qeustion_type(st6,parser))
+        print(determine_qeustion_type(st7,parser))
+        print(determine_qeustion_type(st8,parser))
+        print(determine_qeustion_type(st9,parser))
 
-    st1 = 'How can I help you?'
-    st2 = 'Are you staying or going?'
-    st3 = '...Just ask me for news, politics, or a story from history. What would you like to do?'
-    st4 = 'A: high, B: medium, C: low. Choose one.'
-    st5 = 'What’s your zip code?'
-    st6 = 'Are you ready?'
-    st7 = 'You’re going, aren’t you?'
-    st8 = 'Welcome to the Reddit Notifier skill... just Say: Help me'
-    st9 = 'To get started, you can get a quote, listen to the daily briefing, or get an account summary'
-
-    print(determine_qeustion_type(st1,parser))
-    print(determine_qeustion_type(st2,parser))
-    print(determine_qeustion_type(st3,parser))
-    print(determine_qeustion_type(st4,parser))
-    print(determine_qeustion_type(st5,parser))
-    print(determine_qeustion_type(st6,parser))
-    print(determine_qeustion_type(st7,parser))
-    print(determine_qeustion_type(st8,parser))
-    print(determine_qeustion_type(st9,parser))
-
-#server.stop()
+    #server.stop()
 
 
-'''
-some example
+    '''
+    some example
 
-How can I help you?
-(ROOT
-  (SBARQ
-    (WHADVP (WRB How))
-    (SQ (MD can) (NP (PRP I)) (VP (VB help) (NP (PRP you))))
-    (. ?)))
-Are you ready?
-(ROOT (SQ (VBP Are) (NP (PRP you)) (ADJP (JJ ready)) (. ?)))
-You’re going, aren’t you?
-(ROOT
-  (SQ
-    (S (NP (PRP You)) (VP (VBP ’re) (S (VP (VBG going)))))
-    (, ,)
-    (SQ (VBP are) (RB n’t) (NP (PRP you)))
-    (. ?)))
-1: high, 2: medium, 3: low. Choose one.
-(ROOT
-  (S
+    How can I help you?
+    (ROOT
+    (SBARQ
+        (WHADVP (WRB How))
+        (SQ (MD can) (NP (PRP I)) (VP (VB help) (NP (PRP you))))
+        (. ?)))
+    Are you ready?
+    (ROOT (SQ (VBP Are) (NP (PRP you)) (ADJP (JJ ready)) (. ?)))
+    You’re going, aren’t you?
+    (ROOT
+    (SQ
+        (S (NP (PRP You)) (VP (VBP ’re) (S (VP (VBG going)))))
+        (, ,)
+        (SQ (VBP are) (RB n’t) (NP (PRP you)))
+        (. ?)))
+    1: high, 2: medium, 3: low. Choose one.
+    (ROOT
     (S
-      (FRAG
-        (NP
-          (NP (CD 1))
-          (: :)
-          (NP (JJ high))
-          (, ,)
-          (NP
-            (NP (CD 2))
-            (: :)
+        (S
+        (FRAG
             (NP
-              (NP (NN medium))
-              (, ,)
-              (ADJP (NP (CD 3) (SYM :)) (JJ low)))))))
-    (. .)
-    (S (VP (VB Choose) (NP (CD one))))
-    (. .)))
-Are you staying or going?
-(ROOT
-  (SQ
-    (VBP Are)
-    (NP (PRP you))
-    (VP (VBG staying) (CC or) (VBG going))
-    (. ?)))
-'''
+            (NP (CD 1))
+            (: :)
+            (NP (JJ high))
+            (, ,)
+            (NP
+                (NP (CD 2))
+                (: :)
+                (NP
+                (NP (NN medium))
+                (, ,)
+                (ADJP (NP (CD 3) (SYM :)) (JJ low)))))))
+        (. .)
+        (S (VP (VB Choose) (NP (CD one))))
+        (. .)))
+    Are you staying or going?
+    (ROOT
+    (SQ
+        (VBP Are)
+        (NP (PRP you))
+        (VP (VBG staying) (CC or) (VBG going))
+        (. ?)))
+    '''
