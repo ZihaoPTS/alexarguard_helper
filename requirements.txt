@@ -3,5 +3,6 @@ SpeechRecognition       #need ffmpeg, i downloaded 4.4 from website. after downl
 nltk
 numpy
 urllib3
-regex
-requests
+cleverbotfree
+asyncio
+beautifulsoup4
